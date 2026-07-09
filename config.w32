@@ -1,0 +1,16 @@
+// $Id$
+// vim:ft=javascript
+
+// If your extension references something external, use ARG_WITH
+// ARG_WITH("nic_tester", "for nic_tester support", "no");
+
+// Otherwise, use ARG_ENABLE
+ARG_ENABLE("nic_tester", "enable nic_tester support", "no");
+
+if (PHP_NIC_TESTER != "no") {
+	EXTENSION("nic_tester", "nic_tester.c",null,"/DWIN32");
+	ADD_SOURCES("nic_tester.c", "nic_tester");
+        ADD_LIBRARY("ws2_32.lib");
+        ADD_LIBRARY("iphlpapi.lib");
+}
+
