@@ -655,25 +655,30 @@ PHP_FUNCTION(nic_tester_check)
     array_init(return_value);
     for (i = 0; i < nic_count; i++) {
         if (nics[i].success) {
-            zval result, ipv4_arr, ipv6_arr;
+            zval *result, *ipv4_arr, *ipv6_arr;
 
-            array_init(&result);
-            array_init(&ipv4_arr);
-            array_init(&ipv6_arr);
+            MAKE_STD_ZVAL(result);
+            array_init(result);
 
-            add_assoc_string(&result, "name", nics[i].name, 1);
+            MAKE_STD_ZVAL(ipv4_arr);
+            array_init(ipv4_arr);
+
+            MAKE_STD_ZVAL(ipv6_arr);
+            array_init(ipv6_arr);
+
+            add_assoc_string(result, "name", nics[i].name, 1);
 
             for (j = 0; j < nics[i].ipv4_count; j++) {
-                add_next_index_string(&ipv4_arr, nics[i].ipv4[j], 1);
+                add_next_index_string(ipv4_arr, nics[i].ipv4[j], 1);
             }
-            add_assoc_zval(&result, "ipv4", &ipv4_arr);
+            add_assoc_zval(result, "ipv4", ipv4_arr);
 
             for (j = 0; j < nics[i].ipv6_count; j++) {
-                add_next_index_string(&ipv6_arr, nics[i].ipv6[j], 1);
+                add_next_index_string(ipv6_arr, nics[i].ipv6[j], 1);
             }
-            add_assoc_zval(&result, "ipv6", &ipv6_arr);
+            add_assoc_zval(result, "ipv6", ipv6_arr);
 
-            add_next_index_zval(return_value, &result);
+            add_next_index_zval(return_value, result);
         }
     }
 }
