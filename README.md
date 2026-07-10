@@ -14,6 +14,16 @@
 
     是否是nts看当前PHP.
 
+##  函数签名
+
+    nic_tester_check(string $target_ip, long $port = 80, long $timeout = 1)
+
+    $target_ip  : 目标 IP (IPv4 或 IPv6, 严格 unicast, 不支持 CIDR)
+    $port       : 目标端口 (默认 80)
+    $timeout    : 超时秒数 (默认 1, 整数, >= 1)
+
+    返回 FALSE 当: 地址无效 (非标准 unicast) 或 timeout < 1
+
 ##  编译过程
 
     /usr/local/php5.6/bin/phpize

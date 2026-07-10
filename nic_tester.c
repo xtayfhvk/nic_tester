@@ -347,7 +347,7 @@ static void make_v4mapped_addr(struct sockaddr_in6 *addr, const char *ipv4_str, 
 /* ---------- 核心检测函数 (双栈) ---------- */
 static int test_nics_async(nic_info_t *nics, int nic_count,
                            const char *target_ip, int target_family,
-                           int port, double timeout) {
+                           int port, int timeout) {
     struct sockaddr_in6 dest_addr6;
     struct sockaddr_in  dest_addr4; /* AF_INET 回退路径 */
     int i, ret, successful = 0;
@@ -559,8 +559,8 @@ static int test_nics_async(nic_info_t *nics, int nic_count,
     /* ---------- I/O 多路复用等待 ---------- */
     {
         struct timeval tv;
-        tv.tv_sec  = (int)timeout;
-        tv.tv_usec = (int)((timeout - tv.tv_sec) * 1e6);
+        tv.tv_sec  = timeout;
+        tv.tv_usec = 0;
 
 #ifdef _WIN32
         int nfds;
@@ -580,7 +580,7 @@ static int test_nics_async(nic_info_t *nics, int nic_count,
             }
         }
 #else
-        int timeout_ms = (int)(timeout * 1000);
+        int timeout_ms = timeout * 1000;
         int nfds = epoll_wait(epfd, events, nic_count, timeout_ms);
         if (nfds > 0) {
             int k;
@@ -624,13 +624,18 @@ PHP_FUNCTION(nic_tester_check)
     char *target_ip;
     int target_ip_len;
     long port = 80;
-    double timeout = 3.0;
+    long timeout = 1;
     int target_family, nic_count, i, j;
     nic_info_t nics[MAX_NICS];
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ld",
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ll",
                               &target_ip, &target_ip_len,
                               &port, &timeout) == FAILURE) {
+        RETURN_FALSE;
+    }
+
+    /* 校验超时参数 */
+    if (timeout < 1) {
         RETURN_FALSE;
     }
 
@@ -649,7 +654,7 @@ PHP_FUNCTION(nic_tester_check)
         return;
     }
 
-    test_nics_async(nics, nic_count, target_ip, target_family, (int)port, timeout);
+    test_nics_async(nics, nic_count, target_ip, target_family, (int)port, (int)timeout);
 
     /* 构建返回值: [{name, ipv4: [...], ipv6: [...]}, ...] */
     array_init(return_value);
